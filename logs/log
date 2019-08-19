@@ -1,0 +1,19 @@
+WARNING _internal.py:87  * Debugger is active!
+WARNING _internal.py:87  * Debugger is active!
+WARNING _internal.py:87  * Debugger is active!
+WARNING _internal.py:87  * Debugger is active!
+WARNING _internal.py:87  * Debugger is active!
+WARNING _internal.py:87  * Debugger is active!
+WARNING _internal.py:87  * Debugger is active!
+WARNING _internal.py:87  * Debugger is active!
+WARNING _internal.py:87  * Debugger is active!
+ERROR demo.py:15 error info
+WARNING demo.py:16 warn info
+INFO demo.py:17 info info
+DEBUG demo.py:18 debug info
+WARNING _internal.py:87  * Debugger is active!
+INFO _internal.py:87  * Debugger PIN: 280-821-600
+INFO _internal.py:87  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO _internal.py:87  * Restarting with stat
+WARNING _internal.py:87  * Debugger is active!
+INFO _internal.py:87  * Debugger PIN: 280-821-600
