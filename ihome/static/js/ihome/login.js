@@ -24,5 +24,33 @@ $(document).ready(function() {
             $("#password-err").show();
             return;
         }
+        // 将表单数据存在对象data中
+        var data = {
+            mobile:mobile,
+            password: passwd
+        };
+        // 将data转换成json字符串
+        var jsonData = JSON.stringify(data);
+        $.ajax({
+            url: "/api/v1.0/sessions",
+            type: "post",
+            data: jsonData,
+            contentType: "application/json",
+            dataType: "json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            }, // 请求头,将csrf_token值放到请求中，方便后端csrf进行验证
+            success: function (data) {
+                if (data.errno == "0"){
+                    // 登录成功，跳转主页
+                    location.href = "/";
+                }
+                else{
+                    // 其他错误信息，在页面中展示
+                    $("#password-err span").html(data.errmsg);
+                    $("#password-err").show();
+                }
+            }
+        });
     });
 })
