@@ -133,7 +133,9 @@ def login():
 		current_app.logger.error(e)
 		return jsonify(errno=RET.DBERR, errmsg="获取用户信息失败")
 	# 用数据库的密码与用户填写的密码进行对比验证
-	if user is None or user.check_password(password):
+	# print(user)
+	# print(user.check_password(password))
+	if user is None or not user.check_password(password):
 		# 如果验证码失败，记录错误次数， 返回信息
 		try:
 			redis_store.incr("access_num_%s" % user_ip)
@@ -149,3 +151,14 @@ def login():
 	session["user_id"] = user.id
 
 	return jsonify(errno=RET.OK, errmsg="登录成功")
+
+@api.route("/session", method=["GET"])
+def check_login():
+	"""检查登录状态"""
+	# 尝试从session中获取用户名字
+	name = session.get("name")
+	# 如果session中数据name名字存在，则表示用户已登录，否则未登录
+	if name is not None:
+		return jsonify(errno=RET.OK, errmsg="true", data={"name":name})
+	else:
+		return jsonify(errno=RET.SESSIONERR, errmsg="false")
