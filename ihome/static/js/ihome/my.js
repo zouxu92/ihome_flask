@@ -1,9 +1,18 @@
+// 点击退出按钮时执行的函数
 function logout() {
-    $.get("/api/logout", function(data){
-        if (0 == data.errno) {
-            location.href = "/";
+    $.ajax({
+        url:"/api/v1.0/session",
+        type:"delete",
+        headers:{
+            "X-CSRFToken": detCookie("csrf_token")
+        },
+        dataType:"json",
+        success: function (resp) {
+            if ("0" == resp.errno){
+                location.href = "/index.html";
+            }
         }
-    })
+    });
 }
 
 $(document).ready(function(){
