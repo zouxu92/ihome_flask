@@ -2,21 +2,21 @@
 
 from . import api
 from ihome.utils.commons import login_required
-from flask import g, current_app, jsonify, request
+from flask import g, current_app, jsonify, request, session
 from ihome.utils.response_code import RET
 from ihome.utils.image_storage import storage
 from ihome.models import User
 from ihome import db, constants
 
 
-@api.route("/user/avatar", methods=["POST"])
+@api.route("/users/avatar", methods=["POST"])
 @login_required
 def set_user_avatar():
 	"""设置用户的头像
 	参数： 图片(多媒体表单格式) 用户id(g.user_id)
 	"""
 	# 装饰器的代码中已经将user_id保存到g对象中，所以视图中可以直接读取
-	user_id = g.user
+	user_id = g.user_id
 
 	# 获取图片
 	image_file = request.files.get("avatar")
@@ -44,4 +44,51 @@ def set_user_avatar():
 
 	avatar_url = constants.QINIU_URL_DOMAIN + file_name
 	# 保存成功返回
+	print (avatar_url)
 	return jsonify(errno=RET.OK, errmsg="保存成功", data={"avatar_url": avatar_url})
+
+@api.route("/users/name", methods=["PUT"])
+@login_required
+def change_user_name():
+	"""设置用户昵称
+	参数: 用户昵称name ,用户id(g.user_id)
+	"""
+	# 装饰器的代码中已经将user_id保存到g对象中，所以视图中可以直接读取
+	user_id = g.user_id
+
+	# 获取用户想要设置的用户名
+	req_data = request.get_json()
+	if not req_data:
+		return jsonify(errno=RET.PARAMERR, errmsg="参数不完整")
+
+	name = req_data.get("name")  # 用户想要设置的名字
+	if not name:
+		return jsonify(errno=RET.PARAMERR, errmsg="名字不能为空")
+
+	# 保存用户昵称name，并同时判断name是否重复（利用数据库的唯一索引)
+	try:
+		User.query.filter_by(id=user_id).update({"name": name})
+		db.session.commit()
+	except Exception as e:
+		current_app.logger.error(e)
+		db.session.rollback()
+		return jsonify(errno=RET.DBERR, errmsg="设置用户错误")
+	# 修改session数据中的name字段
+	session["name"] = name
+	return jsonify(errno=RET.OK, errmsg="OK", data={"name": name})
+
+@api.route("/user", methods=["GET"])
+@login_required
+def get_user_profile():
+    """获取个人信息"""
+    user_id = g.user_id
+    # 查询数据库获取个人信息
+    try:
+        user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="获取用户信息失败")
+
+    if user is None:
+        return jsonify(errno=RET.NODATA, errmsg="无效操作")
+    return jsonify(errno=RET.OK, errmsg="OK", data=user.to_dict())
